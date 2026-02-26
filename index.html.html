@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day Trading Strategy Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a0c10;
+    --bg-card: #12151c;
+    --bg-elevated: #1a1e2a;
+    --border: #232838;
+    --border-glow: #2e75b620;
+    --gold: #d4a843;
+    --gold-dim: #d4a84340;
+    --blue: #4a90d9;
+    --blue-dim: #4a90d920;
+    --cyan: #56c8d8;
+    --green: #4ade80;
+    --red: #f87171;
+    --text-primary: #e8ecf4;
+    --text-secondary: #8892a8;
+    --text-muted: #5a6478;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--bg-deep);
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── GRID BG ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grid-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, transparent 0%, var(--bg-deep) 70%);
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(20px);
+    background: rgba(10, 12, 16, 0.7);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+  }
+
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 120px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 80px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: var(--text-primary);
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero h1 .accent { color: var(--gold); }
+  .hero h1 .blue-accent { color: var(--blue); }
+
+  .hero-sub {
+    margin-top: 28px;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 560px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-pillars {
+    display: flex;
+    gap: 48px;
+    margin-top: 56px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .pillar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pillar-icon {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: var(--bg-card);
+  }
+
+  .pillar-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1s;
+  }
+
+  .scroll-indicator span {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+
+  .section-desc {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 640px;
+    margin-bottom: 56px;
+  }
+
+  /* ── TIMEFRAME CARDS ── */
+  .tf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .tf-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tf-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--blue));
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .tf-card:hover {
+    border-color: var(--gold-dim);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .tf-card:hover::before { opacity: 1; }
+
+  .tf-tag {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+
+  .tf-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .tf-purpose {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .tf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tf-action-tag {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── SESSION WINDOWS ── */
+  .sessions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  .session-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .session-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    opacity: 0.04;
+  }
+
+  .session-card.london::after { background: var(--blue); }
+  .session-card.newyork::after { background: var(--gold); }
+
+  .session-city {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .session-card.london .session-city { color: var(--blue); }
+  .session-card.newyork .session-city { color: var(--gold); }
+
+  .session-time {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 16px 0;
+  }
+
+  .session-note {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .session-warning {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 28px;
+    background: rgba(248, 113, 113, 0.06);
+    border: 1px solid rgba(248, 113, 113, 0.15);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  .session-warning .warn-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  /* ── ENTRY CHECKLIST ── */
+  .checklist-trio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .check-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .check-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+
+  .check-card .number {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    line-height: 1;
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    opacity: 0.04;
+    color: var(--text-primary);
+  }
+
+  .check-card .icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin: 0 auto 20px;
+  }
+
+  .check-card:nth-child(1) .icon { background: var(--blue-dim); }
+  .check-card:nth-child(2) .icon { background: var(--gold-dim); }
+  .check-card:nth-child(3) .icon { background: rgba(74, 222, 128, 0.12); }
+
+  .check-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .check-card .subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .check-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── PRICE BEHAVIOR ── */
+  .rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .rule-item {
+    display: flex;
+    gap: 24px;
+    padding: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .rule-item:hover { border-color: var(--gold-dim); }
+
+  .rule-number {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    color: var(--gold);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 48px;
+  }
+
+  .rule-content h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .rule-content p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── RISK MANAGEMENT ── */
+  .risk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .risk-card {
+    padding: 28px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: all 0.3s;
+  }
+
+  .risk-card:hover { border-color: var(--gold-dim); }
+
+  .risk-card .risk-icon {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  .risk-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .risk-card p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ── DAILY ROUTINE ── */
+  .routine-timeline {
+    position: relative;
+    padding-left: 40px;
+  }
+
+  .routine-timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--gold), var(--blue), transparent);
+  }
+
+  .routine-phase {
+    position: relative;
+    margin-bottom: 48px;
+  }
+
+  .routine-phase::before {
+    content: '';
+    position: absolute;
+    left: -33px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: var(--bg-deep);
+  }
+
+  .routine-phase h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .routine-phase .time-hint {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .routine-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .routine-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .routine-step .check {
+    color: var(--green);
+    font-size: 0.8rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── FOOTER ── */
+  .footer-section {
+    text-align: center;
+    padding: 80px 40px 60px;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-quote {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    letter-spacing: 1px;
+    color: var(--text-primary);
+    max-width: 700px;
+    margin: 0 auto 16px;
+    line-height: 1.1;
+  }
+
+  .footer-sub {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+  }
+
+  .footer-divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0 auto 20px;
+  }
+
+  .footer-copy {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    section { padding: 80px 20px; }
+    .sessions { grid-template-columns: 1fr; }
+    .checklist-trio { grid-template-columns: 1fr; }
+    .risk-grid { grid-template-columns: 1fr; }
+    .hero-pillars { gap: 24px; }
+    .tf-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">PLAYBOOK</div>
+  <div class="nav-links">
+    <a href="#timeframes">Timeframes</a>
+    <a href="#sessions">Sessions</a>
+    <a href="#entry">Entry</a>
+    <a href="#rules">Rules</a>
+    <a href="#risk">Risk</a>
+    <a href="#routine">Routine</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    ICT-Based Execution Framework
+  </div>
+  <h1>DAY <span class="accent">TRADING</span><br>STRATEGY <span class="blue-accent">PLAYBOOK</span></h1>
+  <p class="hero-sub">A multi-timeframe precision framework built on smart money concepts, liquidity engineering, and disciplined execution. Three pillars. One system.</p>
+  <div class="hero-pillars">
+    <div class="pillar">
+      <div class="pillar-icon">⬡</div>
+      <div class="pillar-label">Structure</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">◈</div>
+      <div class="pillar-label">Narrative</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">◷</div>
+      <div class="pillar-label">Time</div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- TIMEFRAMES -->
+<section id="timeframes">
+  <div class="reveal">
+    <div class="section-label">// 01 — Analysis</div>
+    <div class="section-title">Multi-Timeframe Analysis</div>
+    <p class="section-desc">Your analysis flows top-down. Each timeframe has a specific role. Never skip a level — every trade requires alignment across the entire stack.</p>
+  </div>
+  <div class="tf-grid">
+    <div class="tf-card reveal">
+      <div class="tf-tag">Macro Lens</div>
+      <div class="tf-name">WEEKLY</div>
+      <div class="tf-purpose">Establish overall trend direction. External break identification for bias only — never for direct entries.</div>
+      <div class="tf-actions">
+        <span class="tf-action-tag">External Break</span>
+        <span class="tf-action-tag">Prev H/L</span>
+        <span class="tf-action-tag">Weekly Range</span>
+      </div>
+    </div>
+    <div class="tf-card reveal">
+      <div class="tf-tag">Directional</div>
+      <div class="tf-name">DAILY</div>
+      <div class="tf-purpose">Commit to a directional bias. Identify inducement, unmitigated order blocks, and key structure.</div>
+      <div class="tf-actions">
+        <span class="tf-action-tag">Inducement</span>
+        <span class="tf-action-tag">Daily OBs</span>
+        <span class="tf-action-tag">Bias Lock</span>
+      </div>
+    </div>
+    <div class="tf-card reveal">
+      <div class="tf-tag">Confirmation</div>
+      <div class="tf-name">4 HOUR</div>
+      <div class="tf-purpose">Confirm daily bias. Map the battlefield — 4H highs/lows, order blocks, liquidity pools, and path to target.</div>
+      <div class="tf-actions">
+        <span class="tf-action-tag">4H Levels</span>
+        <span class="tf-action-tag">OBs & Liq</span>
+        <span class="tf-action-tag">Path Check</span>
+      </div>
+    </div>
+    <div class="tf-card reveal">
+      <div class="tf-tag">Intent Read</div>
+      <div class="tf-name">1 HOUR</div>
+      <div class="tf-purpose">Read smart money intent. Expanding or retracing? Hunt for manipulation — stop hunts, liquidity grabs.</div>
+      <div class="tf-actions">
+        <span class="tf-action-tag">Expansion</span>
+        <span class="tf-action-tag">Manipulation</span>
+        <span class="tf-action-tag">Entry Zone</span>
+      </div>
+    </div>
+    <div class="tf-card reveal">
+      <div class="tf-tag">Execution</div>
+      <div class="tf-name">M5 / M1</div>
+      <div class="tf-purpose">Precision entry. Wait for displacement candle, BOS or CHoCH confirmation on M5. Use M1 for refinement.</div>
+      <div class="tf-actions">
+        <span class="tf-action-tag">Displacement</span>
+        <span class="tf-action-tag">BOS / CHoCH</span>
+        <span class="tf-action-tag">M1 Refine</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SESSIONS -->
+<section id="sessions">
+  <div class="reveal">
+    <div class="section-label">// 02 — Timing</div>
+    <div class="section-title">Session Windows</div>
+    <p class="section-desc">Day trading is time-bound. These are the only windows with sufficient institutional volume for reliable setups. No exceptions.</p>
+  </div>
+  <div class="sessions">
+    <div class="session-card london reveal">
+      <div class="session-city">LONDON</div>
+      <div class="session-time">7:30 AM — 9:45 AM</div>
+      <p class="session-note">High volatility session. Key reversals and initial expansion moves. This is where smart money sets the direction for the day.</p>
+    </div>
+    <div class="session-card newyork reveal">
+      <div class="session-city">NEW YORK</div>
+      <div class="session-time">1:30 PM — 3:45 PM</div>
+      <p class="session-note">Volume spike and trend continuation. Builds on London's move or creates a new leg. Best setups align with the established bias.</p>
+    </div>
+    <div class="session-warning reveal">
+      <span class="warn-icon">⚠</span>
+      Do NOT trade outside these windows. If you missed the window, wait for the next session. Chasing is how you become the liquidity.
+    </div>
+  </div>
+</section>
+
+<!-- ENTRY CHECKLIST -->
+<section id="entry">
+  <div class="reveal">
+    <div class="section-label">// 03 — Execution</div>
+    <div class="section-title">Entry Checklist</div>
+    <p class="section-desc">All three conditions must align before every trade. If even one is missing, you do not enter. This is the backbone of your discipline.</p>
+  </div>
+  <div class="checklist-trio">
+    <div class="check-card reveal">
+      <span class="number">01</span>
+      <div class="icon">⬡</div>
+      <h3>STRUCTURE</h3>
+      <div class="subtitle">Direction</div>
+      <p>Are you trading WITH the daily bias? If bullish, only longs. If bearish, only shorts. Never fight the structure.</p>
+    </div>
+    <div class="check-card reveal">
+      <span class="number">02</span>
+      <div class="icon">◈</div>
+      <h3>NARRATIVE</h3>
+      <div class="subtitle">Candle Story</div>
+      <p>Does the price action confirm your expectation? Displacement, BOS/CHoCH, liquidity sweep — is the setup telling the right story?</p>
+    </div>
+    <div class="check-card reveal">
+      <span class="number">03</span>
+      <div class="icon">◷</div>
+      <h3>TIME</h3>
+      <div class="subtitle">Session Window</div>
+      <p>Are you inside a valid session window? London or New York only. Outside the window means outside the trade.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICE BEHAVIOR -->
+<section id="rules">
+  <div class="reveal">
+    <div class="section-label">// 04 — Price Mechanics</div>
+    <div class="section-title">Price Behavior Rules</div>
+    <p class="section-desc">Universal truths about how price moves. These are the foundation of every setup you will ever take.</p>
+  </div>
+  <div class="rules-list">
+    <div class="rule-item reveal">
+      <div class="rule-number">01</div>
+      <div class="rule-content">
+        <h3>Price Moves in Ranges</h3>
+        <p>Before entering any trade, identify the current range. Mark the high and the low. Your entry exists within this context — never trade blind without knowing the boundaries. The range IS your framework.</p>
+      </div>
+    </div>
+    <div class="rule-item reveal">
+      <div class="rule-number">02</div>
+      <div class="rule-content">
+        <h3>Liquidity Gets Cleared Before Expansion</h3>
+        <p>Price sweeps liquidity — stop losses, equal highs/lows — before the real move begins. Wait for the sweep. Entering before the liquidity grab is how you become the liquidity.</p>
+      </div>
+    </div>
+    <div class="rule-item reveal">
+      <div class="rule-number">03</div>
+      <div class="rule-content">
+        <h3>Gaps Get Filled</h3>
+        <p>Fair Value Gaps and imbalances act as magnets. Price tends to return to fill them before continuing. Use FVGs as targets or as confluence zones for entry. They're your roadmap.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RISK MANAGEMENT -->
+<section id="risk">
+  <div class="reveal">
+    <div class="section-label">// 05 — Protection</div>
+    <div class="section-title">Risk Management</div>
+    <p class="section-desc">No strategy survives without capital protection. These rules keep you alive to trade another day.</p>
+  </div>
+  <div class="risk-grid">
+    <div class="risk-card reveal">
+      <div class="risk-icon">🎯</div>
+      <h4>1–2% Per Trade</h4>
+      <p>Never risk more than 1–2% of your total account on a single trade. Preserve capital above all else.</p>
+    </div>
+    <div class="risk-card reveal">
+      <div class="risk-icon">🛑</div>
+      <h4>Stop Loss First</h4>
+      <p>Always set a stop loss BEFORE entering. No exceptions. No mental stops. Hard stops only.</p>
+    </div>
+    <div class="risk-card reveal">
+      <div class="risk-icon">⚖️</div>
+      <h4>Minimum 1:2 R:R</h4>
+      <p>Only take trades with at least 1:2 risk-to-reward. Ideally 1:3 or higher. Let winners run.</p>
+    </div>
+    <div class="risk-card reveal">
+      <div class="risk-icon">✋</div>
+      <h4>2-Loss Circuit Breaker</h4>
+      <p>If you hit 2 consecutive losses, stop trading for the session. Walk away. Come back tomorrow.</p>
+    </div>
+    <div class="risk-card reveal">
+      <div class="risk-icon">🔒</div>
+      <h4>Never Move Your Stop</h4>
+      <p>Never move your stop loss further from entry. If the trade is wrong, accept the loss. Discipline > hope.</p>
+    </div>
+    <div class="risk-card reveal">
+      <div class="risk-icon">💰</div>
+      <h4>Take Partials</h4>
+      <p>Lock in profit at key levels. Scale out at 1R, trail the rest. Guaranteed profit reduces emotional pressure.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DAILY ROUTINE -->
+<section id="routine">
+  <div class="reveal">
+    <div class="section-label">// 06 — Process</div>
+    <div class="section-title">Daily Routine</div>
+    <p class="section-desc">Consistent execution requires a consistent process. Follow this routine every single trading day.</p>
+  </div>
+  <div class="routine-timeline">
+    <div class="routine-phase reveal">
+      <h3>PRE-SESSION</h3>
+      <div class="time-hint">30–60 min before window opens</div>
+      <div class="routine-steps">
+        <div class="routine-step"><span class="check">✓</span> Review Weekly and Daily charts — confirm or update bias</div>
+        <div class="routine-step"><span class="check">✓</span> Mark key 4H levels: OBs, liquidity pools, FVGs</div>
+        <div class="routine-step"><span class="check">✓</span> Identify 1H intent: expansion or retracement?</div>
+        <div class="routine-step"><span class="check">✓</span> Set alerts at key levels. No screen-staring.</div>
+      </div>
+    </div>
+    <div class="routine-phase reveal">
+      <h3>DURING SESSION</h3>
+      <div class="time-hint">Active trading window</div>
+      <div class="routine-steps">
+        <div class="routine-step"><span class="check">✓</span> Wait for M5 displacement candle within entry zone</div>
+        <div class="routine-step"><span class="check">✓</span> Confirm BOS/CHoCH — structure shift supports bias?</div>
+        <div class="routine-step"><span class="check">✓</span> Enter ONLY if Structure + Narrative + Time align</div>
+        <div class="routine-step"><span class="check">✓</span> Set stop loss and take-profit immediately</div>
+      </div>
+    </div>
+    <div class="routine-phase reveal">
+      <h3>POST-SESSION</h3>
+      <div class="time-hint">After market close</div>
+      <div class="routine-steps">
+        <div class="routine-step"><span class="check">✓</span> Journal every trade: entry, exit, reasoning, result, emotions</div>
+        <div class="routine-step"><span class="check">✓</span> Screenshot the setup. Review what worked and what didn't.</div>
+        <div class="routine-step"><span class="check">✓</span> Step away. Recovery and mental clarity are non-negotiable.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer-section">
+  <div class="footer-quote">Discipline Is Your Edge</div>
+  <p class="footer-sub">The strategy is only as good as your execution. Trust the process. Follow the checklist. Protect your capital.</p>
+  <div class="footer-divider"></div>
+  <p class="footer-copy">CONFIDENTIAL — FOR PERSONAL USE ONLY</p>
+</div>
+
+<script>
+  // Intersection Observer for scroll reveals
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, index * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
